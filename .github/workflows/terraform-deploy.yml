@@ -4,7 +4,7 @@ name: Terraform and EKS Deployment
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
   terraform:
