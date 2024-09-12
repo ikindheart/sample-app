@@ -26,25 +26,19 @@ jobs:
           key: ${{ runner.os }}-terraform-${{ hashFiles('**/*.tf') }}
           restore-keys: |
             ${{ runner.os }}-terraform-
-
-      # Use inline credentials with Terraform commands
       - name: Terraform Init
-        run: |
-          AWS_ACCESS_KEY_ID="ASIAXGSGVPD76XGZI2FC" \
-          AWS_SECRET_ACCESS_KEY="MP5ZgyjXsMn48Chc7LlNt4NkukHfVW3SfVJQVHbT" \
-          terraform init
+        run: terraform init
 
       - name: Terraform Plan
-        run: |
-          AWS_ACCESS_KEY_ID="ASIAXGSGVPD76XGZI2FC" \
-          AWS_SECRET_ACCESS_KEY="MP5ZgyjXsMn48Chc7LlNt4NkukHfVW3SfVJQVHbT" \
-          terraform plan
+        run: terraform plan
 
       - name: Terraform Apply
-        run: |
-          AWS_ACCESS_KEY_ID="ASIAXGSGVPD76XGZI2FC" \
-          AWS_SECRET_ACCESS_KEY="MP5ZgyjXsMn48Chc7LlNt4NkukHfVW3SfVJQVHbT" \
-          terraform apply -auto-approve
+        run: terraform apply -auto-approve
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_REGION: us-east-2
 
   deploy:
     runs-on: ubuntu-latest
@@ -57,14 +51,14 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
         with:
-          version: '1.25.0'
+          version: '1.25.0'  # Specify your kubectl version here
 
-      # Use inline credentials for EKS and kubectl commands
       - name: Configure kubectl
-        run: |
-          AWS_ACCESS_KEY_ID="ASIAXGSGVPD76XGZI2FC" \
-          AWS_SECRET_ACCESS_KEY="MP5ZgyjXsMn48Chc7LlNt4NkukHfVW3SfVJQVHbT" \
-          aws eks --region us-east-2 update-kubeconfig --name education-eks-zdJJOm4M
+        run: aws eks --region us-east-2 update-kubeconfig --name education-eks-zdJJOm4M
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
 
       - name: Deploy to Kubernetes
         run: kubectl apply -f deployment.yaml
