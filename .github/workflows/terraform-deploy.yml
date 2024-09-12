@@ -27,20 +27,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-terraform-
 
-      - name: Set AWS credentials (plain values)
-        run: |
-          export AWS_ACCESS_KEY_ID="ASIAXGSGVPD76XGZI2FC"
-          export AWS_SECRET_ACCESS_KEY="MP5ZgyjXsMn48Chc7LlNt4NkukHfVW3SfVJQVHbT"
-          export AWS_REGION="us-east-2"
-
+      # Use inline credentials with Terraform commands
       - name: Terraform Init
-        run: terraform init
+        run: |
+          AWS_ACCESS_KEY_ID="ASIAXGSGVPD76XGZI2FC" \
+          AWS_SECRET_ACCESS_KEY="MP5ZgyjXsMn48Chc7LlNt4NkukHfVW3SfVJQVHbT" \
+          terraform init
 
       - name: Terraform Plan
-        run: terraform plan
+        run: |
+          AWS_ACCESS_KEY_ID="ASIAXGSGVPD76XGZI2FC" \
+          AWS_SECRET_ACCESS_KEY="MP5ZgyjXsMn48Chc7LlNt4NkukHfVW3SfVJQVHbT" \
+          terraform plan
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: |
+          AWS_ACCESS_KEY_ID="ASIAXGSGVPD76XGZI2FC" \
+          AWS_SECRET_ACCESS_KEY="MP5ZgyjXsMn48Chc7LlNt4NkukHfVW3SfVJQVHbT" \
+          terraform apply -auto-approve
 
   deploy:
     runs-on: ubuntu-latest
@@ -55,14 +59,12 @@ jobs:
         with:
           version: '1.25.0'
 
-      - name: Set AWS credentials (plain values)
-        run: |
-          export AWS_ACCESS_KEY_ID="ASIAXGSGVPD76XGZI2FC"
-          export AWS_SECRET_ACCESS_KEY="MP5ZgyjXsMn48Chc7LlNt4NkukHfVW3SfVJQVHbT"
-          export AWS_REGION="us-east-2"
-
+      # Use inline credentials for EKS and kubectl commands
       - name: Configure kubectl
-        run: aws eks --region us-east-2 update-kubeconfig --name education-eks-zdJJOm4M
+        run: |
+          AWS_ACCESS_KEY_ID="ASIAXGSGVPD76XGZI2FC" \
+          AWS_SECRET_ACCESS_KEY="MP5ZgyjXsMn48Chc7LlNt4NkukHfVW3SfVJQVHbT" \
+          aws eks --region us-east-2 update-kubeconfig --name education-eks-zdJJOm4M
 
       - name: Deploy to Kubernetes
         run: kubectl apply -f deployment.yaml
